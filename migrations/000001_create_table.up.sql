@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS urls(
+    id BIGSERIAL PRIMARY KEY,
+    origin_url VARCHAR UNIQUE,
+    parsed_url VARCHAR UNIQUE
+);
