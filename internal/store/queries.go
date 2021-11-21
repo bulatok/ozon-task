@@ -11,8 +11,7 @@ func AddUrl(oldURL, newURL string, s *Store) {
 }
 
 func FindByParsedURL(parsed_url string, s *Store) (string, error) {
-	sqlSteatment := fmt.Sprintf(`SELECT origin_url FROM urls WHERE parsed_url = '%s'`, parsed_url)
-	rows, err := s.db.Query(sqlSteatment)
+	rows, err := s.db.Query(`SELECT origin_url FROM urls WHERE parsed_url = $1`, parsed_url)
 	if err != nil {
 		return "-1", err
 	}
