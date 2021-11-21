@@ -7,6 +7,13 @@
 
 При запуске можно указать флаг для выбора хранилища (Postgres или in-memory). Например:
 ```bash
-    $ ./ozon-task.exe -store_type in-memory
+    $ mkdir bin
+    $ make build
+    $ ./ozon-task.exe -store_type in-memory # запускаем in-memory вариант
 ```
 или запустить без флага и будет поствален Postgres, который по умолчанию.
+```bash
+    $ mkdir bin
+    $ make build
+    $ ./ozon-task.exe # запускаем Postgres вариант
+```
