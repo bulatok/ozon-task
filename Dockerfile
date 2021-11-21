@@ -7,7 +7,7 @@ COPY go.sum .
 RUN go mod download
 COPY . .
 
-RUN go build -o ./bin ./cmd/ozon-task/
+RUN go build -o ./bin/ozon-task ./cmd/ozon-task/
 
 
 EXPOSE 8080
