@@ -9,11 +9,11 @@
 ```bash
     $ mkdir bin
     $ make build
-    $ ./ozon-task.exe -store_type in-memory # запускаем in-memory вариант
+    $ ./bin/ozon-task.exe -store_type in-memory # запускаем in-memory вариант
 ```
 или запустить без флага и будет поствален Postgres, который по умолчанию.
 ```bash
     $ mkdir bin
     $ make build
-    $ ./ozon-task.exe # запускаем Postgres вариант
+    $ ./bin/ozon-task.exe # запускаем Postgres вариант
 ```
