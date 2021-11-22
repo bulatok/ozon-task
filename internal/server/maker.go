@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/bulatok/ozon-task/internal/store"
 	"hash/fnv"
+	"log"
 	"math"
 	"net/http"
 	"net/url"
@@ -17,9 +18,11 @@ type U struct {
 }
 
 
-func Resp(w *http.ResponseWriter, in string, status int){
+func Resp(w *http.ResponseWriter, in string, status int, typeRequset string){
 	(*w).WriteHeader(status)
-	(*w).Write(GiveJSON(in))
+	res := GiveJSON(in)
+	log.Printf("%s with response %s", typeRequset, string(res))
+	(*w).Write(res)
 }
 
 
@@ -34,7 +37,7 @@ func IsValidUrl(in *string) error {
 
 func GiveJSON(in string) []byte {
 	tt := U{Result: in}
-	res, _ := json.Marshal(tt) // 100% ok (hope)
+	res, _ := json.Marshal(tt)
 	return res
 }
 
@@ -45,11 +48,11 @@ func GetHash(s string) uint64 {
 	return h.Sum64()
 }
 
-
+// GetCoded:
+// 1) Calculate a hash of the original string
+// 2) Takes the remainder of the division by 63^10
+// 3) So we got hash(originURL)%(63^10)_10 -> hash_63 number system
 func GetCoded(originURL string) string {
-	// 1) Calculate a hash of the original string
-	// 2) Takes the remainder of the division by 63^10
-	// 3) So we got hash(originURL)%(63^10)_10 -> hash_62 number system
 	allowed := make(map[int]int32)
 	idx := 0
 	for i := 'a'; i <= 'z'; i += 1 {
@@ -65,11 +68,15 @@ func GetCoded(originURL string) string {
 		idx += 1
 	}
 	allowed[idx] = '_'
+
 	mx := GetHash(originURL)
 	mx %= uint64(math.Pow(float64(len(allowed)), 10))
+
 	newURL := ""
 	nwBase := uint64(len(allowed))
-	for { // mx(base=10) -> mxNew(base=len(allowed))
+
+	// mx(base=10) -> mxNew(base=len(allowed))
+	for {
 		if mx < nwBase {
 			newURL += string(allowed[int(mx)])
 			break
@@ -87,7 +94,9 @@ func CreateNewURL(originURL string, s *store.Store) (string, error) {
 	newURL := GetCoded(originURL)
 	switch s.TypeDB{
 	case "Postgres":
-		store.AddUrl(originURL, newURL, s)
+		if err := store.AddUrl(originURL, newURL, s); err != nil{
+			return "-1", err
+		}
 	default:
 		store.AddUrlInMemory(originURL, newURL, s)
 	}

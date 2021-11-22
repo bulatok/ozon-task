@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"strings"
 	"testing"
 )
@@ -23,13 +22,13 @@ func TestServer_hanldeMainGET(t *testing.T) {
 			"bad url",
 			"http://localhost:8080/?uuuuu=1",
 			http.StatusBadRequest,
-			`{"result":"no such URL"}`,
+			`{"result":"cannot find '?uuuuu=1': not found"}`,
 		},
 		{
 			"bad url",
 			"http://localhost:8080/YH1foQ4FFKHepep",
 			http.StatusBadRequest,
-			`{"result":"no such URL"}`,
+			`{"result":"cannot find 'YH1foQ4FFKHepep': not found"}`,
 		},
 		{
 			"correct url",
@@ -69,32 +68,26 @@ func TestServer_hanldeMainGET(t *testing.T) {
 func TestServer_hanldeMainPOST(t *testing.T) {
 	tests := []struct {
 		name 		string
-		vls 		url.Values
+		jsonData 	string
 		expectCode  int
 		expectJSON  string
 	}{
 		{
 			"incorrect form value",
-			url.Values{
-				"blabla" : {"https://www.google.com/"},
-			},
+			`{"blabla": "https://www.google.com/"}`,
 			http.StatusBadRequest,
-			`{"result":"'' is incorrect URL"}`,
+			`{"result":"json query is incorrect"}`,
 
 		},
 		{
 			"incorrect url",
-			url.Values{
-				"url" : {"google.com"},
-			},
+			`{"url": "google.com"}`,
 			http.StatusBadRequest,
 			`{"result":"'google.com' is incorrect URL"}`,
 		},
 		{
 			"correct url",
-			url.Values{
-				"url" : {"https://ya.ru/"},
-			},
+			`{"url": "https://ya.ru/"}`,
 			http.StatusOK,
 			`{"result":"http://localhost:8080/RFCzyRcRNU"}`,
 		},
@@ -112,15 +105,15 @@ func TestServer_hanldeMainPOST(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			w := httptest.NewRecorder()
-			req, err := http.NewRequest(http.MethodPost, "http://localhost:8080/", strings.NewReader(tt.vls.Encode()))
+			req, err := http.NewRequest(http.MethodPost, "http://localhost:8080/", strings.NewReader(tt.jsonData))
 			if err != nil{
 				log.Fatal(err)
 			}
-			req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
+			req.Header.Set("Content-Type", "application/json; charset=UTF-8")
 
 			serverTest.ServeHTTP(w, req)
 			serverTest.hanldeMain()
+
 
 			assert.Equal(t, tt.expectCode, w.Code)
 			assert.Equal(t, tt.expectJSON, w.Body.String())

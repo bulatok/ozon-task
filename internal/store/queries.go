@@ -1,27 +1,32 @@
 package store
 
 import (
+	"database/sql"
 	"fmt"
 	"time"
 )
 
-func AddUrl(oldURL, newURL string, s *Store) {
+func AddUrl(origin_url, parsed_url string, s *Store) error{
+	if _, found := FindByParsedURL(parsed_url, s); found == nil{
+		return nil
+	}
 	sqlSteatment := `INSERT INTO urls (origin_url, parsed_url) VALUES($1, $2)` // urls is a table
-	s.db.QueryRow(sqlSteatment, oldURL, newURL)
+	if _, err := s.db.Exec(sqlSteatment, origin_url, parsed_url); err != nil{
+		return fmt.Errorf("Add url : %v", err)
+	}
+	return nil
 }
 
 func FindByParsedURL(parsed_url string, s *Store) (string, error) {
-	rows, err := s.db.Query(`SELECT origin_url FROM urls WHERE parsed_url = $1`, parsed_url)
-	if err != nil {
-		return "-1", err
+	var origin_url string
+	if err := s.db.QueryRow("SELECT origin_url FROM urls WHERE parsed_url = $1",
+		parsed_url).Scan(&origin_url); err != nil {
+		if err == sql.ErrNoRows {
+			return "-1", fmt.Errorf(`cannot find '%s': not found`, parsed_url)
+		}
+		return "-1", fmt.Errorf(`cannot find '%s': %w`, parsed_url, err)
 	}
-	err = fmt.Errorf("no such URL") // default answer will be such like
-	res :=  ""
-	for rows.Next() {
-		rows.Scan(&res)
-		err = nil
-	}
-	return res, err
+	return origin_url, nil
 }
 func CleanUp(s *Store){
 	s.db.Exec(`DELETE FROM urls`)
