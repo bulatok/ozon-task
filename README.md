@@ -19,7 +19,9 @@
 ```
 Пример POST запроса через curl
 ```bash
-    curl -X POST http://localhost:8080
-   -H 'Content-Type: application/json'
-   -d '{"url":"https://www.google.com/"}'
+    $ curl -X POST http://localhost:8080 -H 'Content-Type: application/json' -d '{"url":"https://www.google.com/"}'
+```
+Для запуска в докере нужно запулить image и ввести комманду
+```bash
+    $ docker-compose run -p 8080:8080 server
 ```

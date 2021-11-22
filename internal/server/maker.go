@@ -119,12 +119,3 @@ func FindURL(parsedURL string, s *store.Store) (string, error) {
 	}
 	return res, nil
 }
-
-
-func IsRequestOK(in string) error{
-	// /?url=.... || /cut?url=...
-	if strings.Contains(in, "/?url=") || strings.Contains(in, "/cut?url="){
-		return nil
-	}
-	return fmt.Errorf("invalid request")
-}
