@@ -9,13 +9,13 @@
 ```bash
     $ mkdir bin
     $ make build
-    $ ./bin/ozon-task.exe -store_type in-memory # запускаем in-memory вариант
+    $ ./bin/ozon-task -store_type in-memory # запускаем in-memory вариант
 ```
 или запустить без флага и будет поствален Postgres, который по умолчанию.
 ```bash
     $ mkdir bin
     $ make build
-    $ ./bin/ozon-task.exe # запускаем Postgres вариант
+    $ ./bin/ozon-task # запускаем Postgres вариант
 ```
 Пример POST запроса через curl
 ```bash
