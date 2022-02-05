@@ -2,52 +2,35 @@ package store
 
 import (
 	"database/sql"
+	"github.com/bulatok/ozon-task/configs"
+	"github.com/bulatok/ozon-task/internal/store/SQLdb"
+	in_memory "github.com/bulatok/ozon-task/internal/store/in-memory"
 	_ "github.com/lib/pq"
-	"github.com/patrickmn/go-cache"
+	cc "github.com/patrickmn/go-cache"
 	"time"
 )
 
-
-type Store struct {
-	TypeDB string
-	db    *sql.DB
-	dbURL string
-	cch *cache.Cache
+type Store interface {
+	Open() error
+	Close() error
+	AddLink(string, string) error
+	FindByURL(string) (string, error)
 }
 
-
-func Create(TypeDB, dbURL string) *Store {
-	return &Store{
-		TypeDB: TypeDB,
-		db:    &sql.DB{},
-		dbURL: dbURL,
-		cch : cache.New(5*time.Minute, 10*time.Minute),
+func CreateInMemory() *in_memory.InMemory{
+	return &in_memory.InMemory{
+		Cache: cc.New(time.Minute * 5, time.Minute*10),
+		Timeout: time.Minute * 5,
 	}
 }
 
-
-func (s *Store) Open() error {
-	db, err := sql.Open("postgres", s.dbURL)
-	if err != nil {
-		return err
+func CreatePostgreDB(config *configs.Config) (*SQLdb.PostgreDB, error){
+	db :=  &SQLdb.PostgreDB{
+		DB : &sql.DB{},
+		DbURL: config.DatabaseURL,
 	}
-	if err = db.Ping(); err != nil {
-		return err
+	if err := db.Open(); err != nil{
+		return nil, err
 	}
-	s.db = db
-	return nil
-}
-
-
-func (s *Store) Close() {
-	s.db.Close()
-}
-
-
-func CreateTEST() *Store{
-	return &Store{
-		TypeDB: "Postgres",
-		db: &sql.DB{},
-		dbURL: "postgres://postgres:qwerty@database:5432/postgres?sslmode=disable",
-	}
+	return db, nil
 }

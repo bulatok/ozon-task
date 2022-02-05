@@ -3,20 +3,15 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/bulatok/ozon-task/internal/store"
-	"hash/fnv"
+	"io"
 	"log"
-	"math"
 	"net/http"
 	"net/url"
 )
 
 
-type U struct {
-	Result string `json:"result"`
-}
-
-
+// Resp writes to header the status and optionally
+// returns an error as JSON
 func Resp(w *http.ResponseWriter, in string, status int, typeRequset string){
 	(*w).WriteHeader(status)
 	res := GiveJSON(in)
@@ -24,97 +19,36 @@ func Resp(w *http.ResponseWriter, in string, status int, typeRequset string){
 	(*w).Write(res)
 }
 
-
-func IsValidUrl(in *string) error {
-	_, err := url.ParseRequestURI(*in) // ???
+// IsValidUrl is URL validator
+func IsValidUrl(in string) error {
+	_, err := url.ParseRequestURI(in) // ???
 	if err != nil {
-		return fmt.Errorf("'%v' is incorrect URL", *in)
+		return fmt.Errorf("'%v' is incorrect URL", in)
 	}
 	return nil
 }
 
-
+// GiveJSON returns JSON as []byte
 func GiveJSON(in string) []byte {
+	type U struct {
+		Result string `json:"result"`
+	}
 	tt := U{Result: in}
 	res, _ := json.Marshal(tt)
 	return res
 }
 
-
-func GetHash(s string) uint64 {
-	h := fnv.New64a()
-	h.Write([]byte(s))
-	return h.Sum64()
-}
-
-// GetCoded:
-// 1) Calculate a hash of the original string
-// 2) Takes the remainder of the division by 63^10
-// 3) So we got hash(originURL)%(63^10)_10 -> hash_63 number system
-func GetCoded(originURL string) string {
-	allowed := make(map[int]int32)
-	idx := 0
-	for i := 'a'; i <= 'z'; i += 1 {
-		allowed[idx] = i
-		idx += 1
+func HandleReq(r io.Reader) (string, error){
+	type coming struct{
+		Url string `json:"url"`
 	}
-	for i := 'A'; i <= 'Z'; i += 1 {
-		allowed[idx] = i
-		idx += 1
+	d := json.NewDecoder(r)
+	income := coming{Url: "-1"} // by default it will be "-1" to check if json request has {"url":"someURL"}
+	if err := d.Decode(&income); err != nil{
+		return "", err
 	}
-	for i := '0'; i <= '9'; i += 1 {
-		allowed[idx] = i
-		idx += 1
+	if income.Url == "-1"{
+		return "", fmt.Errorf("json request is incorrect")
 	}
-	allowed[idx] = '_'
-
-	mx := GetHash(originURL)
-	mx %= uint64(math.Pow(float64(len(allowed)), 10))
-
-	newURL := ""
-	nwBase := uint64(len(allowed))
-
-	// mx(base=10) -> mxNew(base=len(allowed))
-	for {
-		if mx < nwBase {
-			newURL += string(allowed[int(mx)])
-			break
-		} else if mx >= nwBase { // for illustration
-			newURL += string(allowed[int(mx%nwBase)])
-			mx /= uint64(len(allowed))
-		}
-	}
-	return newURL
-}
-
-
-func CreateNewURL(originURL string, s *store.Store) (string, error) {
-	// https://?url=0123456789 ???
-	newURL := GetCoded(originURL)
-	switch s.TypeDB{
-	case "Postgres":
-		if err := store.AddUrl(originURL, newURL, s); err != nil{
-			return "-1", err
-		}
-	default:
-		store.AddUrlInMemory(originURL, newURL, s)
-	}
-
-	return newURL, nil
-}
-
-
-func FindURL(parsedURL string, s *store.Store) (string, error) {
-	var res string
-	var err error
-	switch s.TypeDB{
-	case "Postgres":
-		res, err = store.FindByParsedURL(parsedURL, s)
-	default:
-		res, err = store.FindByParsedURLInMemory(parsedURL, s)
-	}
-	if err != nil {
-		return "-1", err
-	}
-	return res, nil
+	return income.Url, nil
 }

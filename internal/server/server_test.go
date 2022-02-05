@@ -2,7 +2,8 @@ package server
 
 import (
 	"bytes"
-	"github.com/bulatok/ozon-task/internal/store"
+	"github.com/bulatok/ozon-task/configs"
+	"github.com/bulatok/ozon-task/internal/store/SQLdb"
 	"github.com/stretchr/testify/assert"
 	"log"
 	"net/http"
@@ -38,14 +39,19 @@ func TestServer_hanldeMainGET(t *testing.T) {
 		},
 	}
 
-	serverTest := NewServer(store.CreateTEST())
+	config, _ := configs.NewConfig()
+	store := SQLdb.CreateTEST(config)
+	serverTest := NewServer(store)
 	if err := serverTest.Store.Open(); err != nil{
 		log.Fatal(err)
 	}
+
 	defer serverTest.Store.Close()
 
-	store.CleanUp(serverTest.Store)
-	store.AddUrl("https://ya.ru/", "RFCzyRcRNU", serverTest.Store) // for third test
+	// for third test
+	if err := store.AddLink("RFCzyRcRNU", "https://ya.ru/"); err != nil{
+		log.Fatal(err)
+	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -93,14 +99,20 @@ func TestServer_hanldeMainPOST(t *testing.T) {
 		},
 	}
 
-	serverTest := NewServer(store.CreateTEST())
+	config, _ := configs.NewConfig()
+	store := SQLdb.CreateTEST(config)
+
+	serverTest := NewServer(store)
 	if err := serverTest.Store.Open(); err != nil{
 		log.Fatal(err)
 	}
+
 	defer serverTest.Store.Close()
 
-	store.CleanUp(serverTest.Store)
-	store.AddUrl("https://ya.ru/", "RFCzyRcRNU", serverTest.Store) // for third test
+	// for third test
+	if err := store.AddLink("RFCzyRcRNU", "https://ya.ru/"); err != nil{
+		log.Fatal(err)
+	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

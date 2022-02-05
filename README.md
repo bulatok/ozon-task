@@ -7,25 +7,21 @@
 
 При запуске можно указать флаг для выбора хранилища (Postgres или in-memory). Например:
 ```bash
-    $ mkdir bin
     $ make build
-    $ ./bin/ozon-task.exe -store_type in-memory # запускаем in-memory вариант
+    $ ./bin/ozon-task -store_type in-memory # запускаем in-memory вариант
 ```
 или запустить без флага и будет поствален Postgres, который по умолчанию.
 ```bash
-    $ mkdir bin
     $ make build
-    $ ./bin/ozon-task.exe # запускаем Postgres вариант
+    $ ./bin/ozon-task -store_type Postgres # запускаем Postgres вариант
 ```
 Пример POST запроса через curl
 ```bash
     $ curl -X POST http://localhost:8080 -H 'Content-Type: application/json' -d '{"url":"https://www.google.com/"}'
 ```
-Для запуска в докере нужно запулить image и ввести комманду
+
+## Запуск как докер контейнер
 ```bash
-    $ docker-compose run -p 8080:8080 server
-<<<<<<< HEAD
+    $ git clone https://github.com/bulatok/ozon-task.git
+    $ make start
 ```
-=======
-```
->>>>>>> 56f6030e651d6946491e1fef9848dc10c5ede8ad

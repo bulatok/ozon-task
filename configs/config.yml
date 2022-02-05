@@ -1,3 +1,2 @@
+database_url : postgres://postgres:qwerty@database:5432/ozon_task?sslmode=disable
 port : :8080
-database_url : postgres://postgres:qwerty@database:5432/postgres?sslmode=disable
-#database_url : user=postgres password= dbname= sslmode=disable

@@ -1,25 +1,26 @@
-package logic
+package configs
 
 import (
 	"gopkg.in/yaml.v2"
 	"os"
 )
 
+const configPath string = "./configs/config.yml"
+
 type Config struct {
 	Port        string `yaml:"port"`
 	DatabaseURL string `yaml:"database_url"`
 }
 
-func NewConfig(ConfigPath string) (*Config, error) {
+func NewConfig() (*Config, error) {
 	config := &Config{}
 
 	// Opening config file ...
-	f, err := os.Open(ConfigPath)
+	f, err := os.Open(configPath)
 	if err != nil {
 		return nil, err
 	}
 
-	// Initing file ...
 	d := yaml.NewDecoder(f)
 
 	// Parsing configs
