@@ -17,22 +17,22 @@
 или запустить без флага и будет поствален Postgres, который по умолчанию.
 ```bash
     $ make build
-<<<<<<< HEAD
     $ ./bin/ozon-task -store_type Postgres # запускаем Postgres вариант
-=======
-    $ ./bin/ozon-task # запускаем Postgres вариант
->>>>>>> dff37a30a975c73f0f25a15b86077fa8db6efdce
 ```
-Пример POST запроса через curl
+## Пример
+Пример POST запроса через curl. Ответом является сокращенная ссылка, полученная путем хеширования.
+
 ```bash
     $ curl -X POST http://localhost:8080 -H 'Content-Type: application/json' -d '{"url":"https://www.google.com/"}'
+    $ {"result":"http://localhost:8080/sRFZovB1kU"} # response
 ```
-<<<<<<< HEAD
-
+И при GET запросе, получаем нашу исходную ссылку в качестве ответа
+```bash
+    $ curl -X GET http://localhost:8080/sRFZovB1kU
+    $ {"result":"https://www.google.com/"} # response
+```
 ## Запуск как докер контейнер
 ```bash
     $ git clone https://github.com/bulatok/ozon-task.git
     $ make start
 ```
-=======
->>>>>>> dff37a30a975c73f0f25a15b86077fa8db6efdce
