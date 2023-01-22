@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package links;
+
+option go_package = ".;pb";
+
+message ShortLinkRequest{
+  string originalLink = 1;
+}
+
+message ShortLinkResponse {
+  string shortLink = 1;
+}
+
+message GetOriginalRequest {
+  string shortLink = 1;
+}
+
+message GetOriginalResponse {
+  string originalLink = 1;
+}
+
+service Links {
+  rpc ShortLink(ShortLinkRequest) returns (ShortLinkResponse) {};
+  rpc GetOriginalLink(GetOriginalRequest) returns (GetOriginalResponse) {};
+}

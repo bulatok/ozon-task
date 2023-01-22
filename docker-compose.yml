@@ -1,0 +1,40 @@
+version: "3.7"
+services:
+  db_redis:
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass qwerty
+  db_postgres:
+    image: postgres
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - data:/var/lib/postgresql/data
+  migrate:
+    image: migrate/migrate
+    depends_on:
+      - db_postgres
+    volumes:
+      - ./migrations:/migrations
+    command:
+      [ "-path", "/migrations", "-database",  "postgres://postgres:qwerty@db_postgres:5432/ozon_task?sslmode=disable", "up"]
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env
+    depends_on:
+      - db_postgres
+      - db_redis
+    networks:
+      - default
+    ports:
+      - "8080:8080"
+      - "8012:8012"
+volumes:
+  data:

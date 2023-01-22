@@ -1,0 +1,20 @@
+http:
+  port: "8080"
+  host: "0.0.0.0"
+
+grpc:
+  port: "8012"
+  host: "0.0.0.0"
+
+store:
+  postgres:
+    dst_url: "postgres://postgres:qwerty@db_postgres:5432/ozon_task?sslmode=disable"
+  redis:
+    addr: "db_redis:6379"
+    password: "qwerty"
+    read_timeout: -1
+
+service:
+  log_level: "DEV"
+  public_url: "http://127.0.0.1:8080"
+
